@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DiscreteActionSimulator.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projetQualyM</a> &gt; <a href="index.source.html" class="el_package">discreteBehaviorSimulator</a> &gt; <span class="el_source">DiscreteActionSimulator.java</span></div><h1>DiscreteActionSimulator.java</h1><pre class="source lang-java linenums">
+package discreteBehaviorSimulator;
+
+import action.DiscreteActionInterface;
+
+import java.lang.reflect.Method;
+import java.util.Collections;
+import java.util.Vector;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+
+/**
+ * @author Tiphaine Bulou (2016)
+ * @author Flavien Vernier
+ *
+ */
+public class DiscreteActionSimulator implements Runnable {
+
+
+	private Thread t;
+<span class="nc" id="L24">	private boolean running = false;</span>
+	
+	private Clock globalTime;
+	
+<span class="nc" id="L28">	private Vector&lt;DiscreteActionInterface&gt; actionsList = new Vector&lt;&gt;();</span>
+	
+	private int nbLoop;
+	private int step;
+	
+	private Logger logger;
+	private FileHandler logFile; 
+	private ConsoleHandler logConsole; 
+
+<span class="nc" id="L37">	public DiscreteActionSimulator(){</span>
+		
+		// Start logger
+<span class="nc" id="L40">		this.logger = Logger.getLogger(&quot;DAS&quot;);</span>
+		//this.logger = Logger.getLogger(&quot;APP&quot;);
+<span class="nc" id="L42">		this.logger.setLevel(Level.ALL);</span>
+<span class="nc" id="L43">		this.logger.setUseParentHandlers(true);</span>
+		try{
+<span class="nc" id="L45">			this.logFile = new FileHandler(this.getClass().getName() + &quot;.log&quot;);</span>
+			//this.logFile.setFormatter(new SimpleFormatter());
+<span class="nc" id="L47">			this.logFile.setFormatter(new LogFormatter());</span>
+<span class="nc" id="L48">			this.logConsole = new ConsoleHandler();</span>
+<span class="nc" id="L49">		}catch(Exception e){</span>
+<span class="nc" id="L50">			e.printStackTrace();</span>
+<span class="nc" id="L51">		}</span>
+<span class="nc" id="L52">		this.logger.addHandler(logFile);</span>
+<span class="nc" id="L53">		this.logger.addHandler(logConsole);</span>
+		
+
+<span class="nc" id="L56">		this.globalTime = Clock.getInstance();</span>
+		
+<span class="nc" id="L58">		this.t = new Thread(this);</span>
+<span class="nc" id="L59">		this.t.setName(&quot;Discrete Action Simulator&quot;);</span>
+<span class="nc" id="L60">	}</span>
+	
+	/**
+	 * @param nbLoop defines the number of loop for the simulation, the simulation is infinite if nbLoop is negative or 0.
+	 */
+	public void setNbLoop(int nbLoop){
+<span class="nc bnc" id="L66" title="All 2 branches missed.">		if(nbLoop&gt;0){</span>
+<span class="nc" id="L67">			this.nbLoop = nbLoop;</span>
+<span class="nc" id="L68">			this.step = 1;</span>
+		}else{ // running infinitely
+<span class="nc" id="L70">			this.nbLoop = 0;</span>
+<span class="nc" id="L71">			this.step = -1;</span>
+		}
+<span class="nc" id="L73">	}</span>
+	
+	public void addAction(DiscreteActionInterface c){
+
+<span class="nc bnc" id="L77" title="All 2 branches missed.">		if(c.hasNext()) {</span>
+			// add to list of actions, next is call to the action exist at the first time
+<span class="nc" id="L79">			this.actionsList.add(c.next());</span>
+
+			// sort the list for ordered execution 
+<span class="nc" id="L82">			Collections.sort(this.actionsList);</span>
+		}
+<span class="nc" id="L84">	}</span>
+	
+	/*public void addTemporalRule(TemporalRule r){
+		
+	}*/
+
+	/**
+	 * @return the laps time before the next action
+	 */
+	private int nextLapsTime() {
+<span class="nc" id="L94">		DiscreteActionInterface currentAction = this.actionsList.get(0);</span>
+<span class="nc" id="L95">		return currentAction.getCurrentLapsTime();</span>
+	}
+	/**
+	 * @return laps time of the running action
+	 */
+	private int runAction(){
+		// Run the first action
+<span class="nc" id="L102">		int sleepTime = 0;</span>
+
+
+		// TODO Manage parallel execution !  
+<span class="nc" id="L106">		DiscreteActionInterface currentAction = this.actionsList.get(0);</span>
+<span class="nc" id="L107">		Object o = currentAction.getObject();</span>
+<span class="nc" id="L108">		Method m = currentAction.getMethod();</span>
+<span class="nc" id="L109">		sleepTime = currentAction.getCurrentLapsTime();</span>
+		
+		try {
+			//Thread.sleep(sleepTime); // Real time can be very slow
+<span class="nc" id="L113">			Thread.yield();</span>
+			//Thread.sleep(1000); // Wait message bus sends
+<span class="nc bnc" id="L115" title="All 2 branches missed.">			if(this.globalTime!=null) {</span>
+<span class="nc" id="L116">				this.globalTime.increase(sleepTime);</span>
+			}
+<span class="nc" id="L118">			m.invoke(o);</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">			if(this.globalTime!=null) {</span>
+<span class="nc" id="L120">				this.logger.log(Level.FINE, &quot;[DAS] run action &quot; + m.getName() + &quot; on &quot; + o.getClass().getName() + &quot;:&quot; + o.hashCode() + &quot; at &quot; + this.globalTime.getTime() + &quot; after &quot; + sleepTime + &quot; time units\n&quot;);</span>
+<span class="nc" id="L121">				System.out.println(&quot;[DAS] run action &quot; + m.getName() + &quot; on &quot; + o.getClass().getName() + &quot;:&quot; + o.hashCode() + &quot; at &quot; + this.globalTime.getTime() + &quot; after &quot; + sleepTime + &quot; time units\n&quot;);</span>
+			}else {
+<span class="nc" id="L123">				this.logger.log(Level.FINE, &quot;[DAS] run action &quot; + m.getName() + &quot; on &quot; + o.getClass().getName() + &quot;:&quot; + o.hashCode() + &quot; after &quot; + sleepTime + &quot; time units\n&quot;);</span>
+<span class="nc" id="L124">				System.out.println(&quot;[DAS] run action &quot; + m.getName() + &quot; on &quot; + o.getClass().getName() + &quot;:&quot; + o.hashCode() + &quot; after &quot; + sleepTime + &quot; time units\n&quot;);</span>
+			
+			}
+			
+<span class="nc" id="L128">		}catch (Exception e) {</span>
+<span class="nc" id="L129">			e.printStackTrace();</span>
+<span class="nc" id="L130">		}</span>
+
+<span class="nc" id="L132">		return sleepTime;</span>
+	}
+
+	private void updateTimes(int runningTimeOf1stCapsul){
+		
+		// update time laps off all actions
+<span class="nc bnc" id="L138" title="All 2 branches missed.">		for(int i=1 ; i &lt; this.actionsList.size(); i++){</span>
+			//int d = this.actionsList.get(i).getLapsTime();
+			//this.actionsList.get(i).setLapsTemps(d- runningTimeOf1stCapsul);
+<span class="nc" id="L141">			this.actionsList.get(i).spendTime(runningTimeOf1stCapsul);</span>
+		}
+
+		// get new time lapse of first action
+		/*if(this.globalTime == null) {
+			this.actionsList.get(0).updateTimeLaps();
+		}else {	
+			this.actionsList.get(0).updateTimeLaps(this.globalTime.getTime());
+		}
+		
+		// remove the action if no more lapse time is defined
+		if(this.actionsList.get(0).getLastLapsTime() == null) {
+			this.actionsList.remove(0);
+		}else {
+			// resort the list
+			Collections.sort(this.actionsList);
+		}*/
+
+<span class="nc" id="L159">		DiscreteActionInterface a = this.actionsList.remove(0);</span>
+<span class="nc bnc" id="L160" title="All 2 branches missed.">		if(a.hasNext()) {</span>
+<span class="nc" id="L161">			a = a.next();</span>
+<span class="nc" id="L162">			this.actionsList.addElement(a);</span>
+<span class="nc bnc" id="L163" title="All 2 branches missed.">			if(this.globalTime!=null) {</span>
+<span class="nc" id="L164">				this.logger.log(Level.FINE, &quot;[DAS] reset action &quot; + a.getMethod().getName() + &quot; on &quot; + a.getObject().getClass().getName() + &quot;:&quot; + a.getObject().hashCode() + &quot; at &quot; + this.globalTime.getTime() + &quot; to &quot; + a.getCurrentLapsTime() + &quot; time units\n&quot;);</span>
+<span class="nc" id="L165">				System.out.println(&quot;[DAS] reset action &quot; + a.getMethod().getName() + &quot; on &quot; + a.getObject().getClass().getName() + &quot;:&quot; + a.getObject().hashCode() + &quot; at &quot; + this.globalTime.getTime() + &quot; to &quot; + a.getCurrentLapsTime() + &quot; time units\n&quot;);</span>
+			}else {
+<span class="nc" id="L167">				this.logger.log(Level.FINE, &quot;[DAS] reset action &quot; + a.getMethod().getName() + &quot; on &quot; + a.getObject().getClass().getName() + &quot;:&quot; + a.getObject().hashCode() + &quot; to &quot; + a.getCurrentLapsTime() + &quot; time units\n&quot;);</span>
+<span class="nc" id="L168">				System.out.println(&quot;[DAS] reset action &quot; + a.getMethod().getName() + &quot; on &quot; + a.getObject().getClass().getName() + &quot;:&quot; + a.getObject().hashCode() + &quot; to &quot; + a.getCurrentLapsTime() + &quot; time units\n&quot;);</span>
+			}
+<span class="nc" id="L170">			Collections.sort(this.actionsList);</span>
+		}
+<span class="nc" id="L172">	}</span>
+
+
+	public void run() {
+<span class="nc" id="L176">		int count = this.nbLoop;</span>
+<span class="nc" id="L177">		boolean finished = false;</span>
+
+<span class="nc" id="L179">		System.out.println(&quot;LANCEMENT DU THREAD &quot; + t.getName() + &quot; \n&quot;);</span>
+
+<span class="nc bnc" id="L181" title="All 4 branches missed.">		while(running &amp;&amp; !finished){</span>
+
+<span class="nc bnc" id="L183" title="All 2 branches missed.">			if(!this.actionsList.isEmpty()){</span>
+<span class="nc" id="L184">				System.out.println(this);</span>
+<span class="nc" id="L185">				this.globalTime.setNextJump(this.nextLapsTime());</span>
+				
+<span class="nc" id="L187">				this.globalTime.lockWriteAccess();</span>
+<span class="nc" id="L188">				int runningTime = this.runAction();</span>
+<span class="nc" id="L189">				this.updateTimes(runningTime);</span>
+<span class="nc" id="L190">				this.globalTime.unlockWriteAccess();</span>
+				try {
+<span class="nc" id="L192">					Thread.sleep(100);</span>
+<span class="nc" id="L193">				}catch(Exception e) {</span>
+<span class="nc" id="L194">					e.printStackTrace();</span>
+<span class="nc" id="L195">				}</span>
+				//TODO add global time synchronizer for action with list of date and avoid drift 
+<span class="nc" id="L197">			}else{</span>
+<span class="nc" id="L198">				System.out.println(&quot;NOTHING TO DO\n&quot;);</span>
+<span class="nc" id="L199">				this.stop();</span>
+			}
+
+<span class="nc" id="L202">			count -= this.step;</span>
+<span class="nc bnc" id="L203" title="All 2 branches missed.">			if(count&lt;=0) {</span>
+<span class="nc" id="L204">				finished = true;</span>
+			}
+		}
+<span class="nc" id="L207">		this.running = false;</span>
+<span class="nc bnc" id="L208" title="All 2 branches missed.">		if(this.step&gt;0) {</span>
+<span class="nc" id="L209">			System.out.println(&quot;DAS: &quot; + (this.nbLoop - count) + &quot; actions done for &quot; + this.nbLoop + &quot; turns asked.&quot;);</span>
+		}else {
+<span class="nc" id="L211">			System.out.println(&quot;DAS: &quot; + (count) + &quot; actions done!&quot;);			</span>
+		}
+<span class="nc" id="L213">	}</span>
+
+	public void start(){
+<span class="nc" id="L216">		this.running = true;</span>
+<span class="nc" id="L217">		this.t.start();</span>
+<span class="nc" id="L218">	}</span>
+
+	public void stop(){
+<span class="nc" id="L221">		System.out.println(&quot;STOP THREAD &quot; + t.getName() + &quot;obj &quot; + this);</span>
+<span class="nc" id="L222">		this.running = false;</span>
+<span class="nc" id="L223">	}</span>
+	
+	public String toString(){
+<span class="nc" id="L226">		StringBuffer toS = new StringBuffer(&quot;------------------\nTestAuto :&quot; + this.actionsList.size());</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">		for(DiscreteActionInterface c : this.actionsList){</span>
+<span class="nc" id="L228">			toS.append(c.toString() + &quot;\n&quot;);</span>
+<span class="nc" id="L229">		}</span>
+<span class="nc" id="L230">		toS.append(&quot;---------------------\n&quot;);</span>
+<span class="nc" id="L231">		return toS.toString();</span>
+	}
+
+	public boolean getRunning() {
+<span class="nc" id="L235">		return this.running;</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

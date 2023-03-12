@@ -1,0 +1,14 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+projetQualyM,timer,PeriodicTimer,110,0,2,0,26,0,8,0,7,0
+projetQualyM,timer,TimeBoundedTimer,118,0,6,0,29,0,8,0,5,0
+projetQualyM,timer,DateTimer,43,19,2,0,11,5,3,2,2,2
+projetQualyM,timer,OneShotTimer,24,0,0,0,9,0,3,0,3,0
+projetQualyM,timer,RandomTimer.randomDistribution,44,0,0,0,2,0,1,0,1,0
+projetQualyM,timer,MergedTimer,37,0,6,0,8,0,6,0,3,0
+projetQualyM,timer,RandomTimer,280,0,28,0,63,0,31,0,14,0
+projetQualyM,action,DiscreteActionDependent,150,0,14,0,36,0,20,0,13,0
+projetQualyM,action,DiscreteActionOnOffDependent,212,0,16,0,48,0,19,0,11,0
+projetQualyM,action,DiscreteAction,166,0,16,0,41,0,18,0,10,0
+projetQualyM,discreteBehaviorSimulator,DiscreteActionSimulator,452,0,26,0,100,0,24,0,11,0
+projetQualyM,discreteBehaviorSimulator,Clock,144,0,10,0,44,0,20,0,15,0
+projetQualyM,discreteBehaviorSimulator,LogFormatter,60,0,0,0,14,0,5,0,5,0

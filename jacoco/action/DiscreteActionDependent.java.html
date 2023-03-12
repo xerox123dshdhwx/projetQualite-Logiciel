@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DiscreteActionDependent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projetQualyM</a> &gt; <a href="index.source.html" class="el_package">action</a> &gt; <span class="el_source">DiscreteActionDependent.java</span></div><h1>DiscreteActionDependent.java</h1><pre class="source lang-java linenums">package action;
+
+import timer.Timer;
+
+import java.lang.reflect.Method;
+import java.util.Iterator;
+import java.util.TreeSet;
+
+/**
+ * @author flver
+ *
+ */
+//TODO Must be refactored to be generic
+public class DiscreteActionDependent implements DiscreteActionInterface {
+	
+	protected DiscreteAction baseAction;
+	protected TreeSet&lt;DiscreteAction&gt; depedentActions;
+	private Iterator&lt;DiscreteAction&gt; it;
+	protected DiscreteAction currentAction;
+	
+	
+	/**
+	 * Construct a series of dependent actions, first action (method) called is baseMethodName, then method nextMethod() is called to select the next action. 
+	 * 
+	 * @param o
+	 * @param baseMethodName
+	 * @param timerBase
+	 */	
+<span class="nc" id="L29">	public DiscreteActionDependent(Object o, String baseMethodName, Timer timerBase){</span>
+<span class="nc" id="L30">		this.baseAction = new DiscreteAction(o, baseMethodName, timerBase);</span>
+<span class="nc" id="L31">		this.depedentActions = new TreeSet&lt;DiscreteAction&gt;();</span>
+<span class="nc" id="L32">		this.it = this.depedentActions.iterator();</span>
+<span class="nc" id="L33">		this.currentAction = this.baseAction;</span>
+<span class="nc" id="L34">	}</span>
+	
+	public void addDependence(Object o, String depentMethodName, Timer timerDependence) {
+<span class="nc" id="L37">		this.depedentActions.add(new DiscreteAction(o, depentMethodName, timerDependence));</span>
+<span class="nc" id="L38">	}</span>
+	
+	/*private void dates2Timalapse(TreeSet&lt;Integer&gt; datesOn, TreeSet&lt;Integer&gt; datesOff, Vector&lt;Integer&gt; timeLapseOn, Vector&lt;Integer&gt; timeLapseOff) {
+		Vector&lt;Integer&gt; currentTimeLapse;
+		TreeSet&lt;Integer&gt; currentDates;
+		Integer date=0;
+		if(datesOn.first()&lt;datesOff.first()) {
+			currentTimeLapse = timeLapseOn;
+			currentDates = datesOn;
+		}else {
+			currentTimeLapse = timeLapseOff;	
+			currentDates = datesOff;		
+		}
+		Integer nextDate;
+		
+		while(datesOn.size()&gt;0 || datesOff.size()&gt;0) {
+			nextDate = currentDates.first();
+		
+			currentTimeLapse.add(nextDate - date);
+			currentDates.remove(nextDate);
+		
+			date = nextDate;
+			
+			if(currentDates == datesOn) {
+				currentDates = datesOff;
+				currentTimeLapse = timeLapseOff;
+			}else {
+				currentDates = datesOn;
+				currentTimeLapse = timeLapseOn;			
+			}
+		}
+		
+	}
+	@SuppressWarnings(&quot;unchecked&quot;)
+	public DiscreteActionDependent(Wo o, String on, TreeSet&lt;Integer&gt; datesOn, String off, TreeSet&lt;Integer&gt; datesOff){
+		Vector&lt;Integer&gt; timeLapseOn = new Vector&lt;Integer&gt;();
+		Vector&lt;Integer&gt; timeLapseOff = new Vector&lt;Integer&gt;();
+		
+		dates2Timalapse((TreeSet&lt;Integer&gt;)datesOn.clone(), (TreeSet&lt;Integer&gt;)datesOff.clone(), timeLapseOn, timeLapseOff);
+		
+		this.baseAction = new DiscreteAction(o, on, timeLapseOn);
+		this.offAction = new DiscreteAction(o, off, timeLapseOff);
+		
+		if(datesOn.first() &lt; datesOff.first()){
+			this.currentAction = this.baseAction;
+		}else{
+			this.currentAction = this.offAction;
+		}
+	}
+*/
+	private void reInit() {
+		//this.baseAction.updateTimeLaps();
+<span class="nc bnc" id="L90" title="All 2 branches missed.">		for (Iterator&lt;DiscreteAction&gt; iter = this.depedentActions.iterator(); iter.hasNext(); ) {</span>
+<span class="nc" id="L91">		    DiscreteAction element = iter.next();</span>
+		    //element.updateTimeLaps();
+<span class="nc" id="L93">		}		</span>
+<span class="nc" id="L94">	}</span>
+	
+	public void nextMethod(){
+<span class="nc bnc" id="L97" title="All 2 branches missed.">		if (this.currentAction == this.baseAction){</span>
+<span class="nc" id="L98">			this.it = this.depedentActions.iterator();</span>
+<span class="nc" id="L99">			this.currentAction = this.it.next();</span>
+<span class="nc bnc" id="L100" title="All 2 branches missed.">		}else if(this.currentAction == this.depedentActions.last()){</span>
+<span class="nc" id="L101">			this.currentAction = this.baseAction;</span>
+<span class="nc" id="L102">			this.reInit();</span>
+		}else {
+<span class="nc" id="L104">			this.currentAction = this.it.next();</span>
+		}
+<span class="nc" id="L106">	}</span>
+	
+	public void spendTime(int t) {
+<span class="nc bnc" id="L109" title="All 2 branches missed.">		for (Iterator&lt;DiscreteAction&gt; iter = this.depedentActions.iterator(); iter.hasNext(); ) {</span>
+<span class="nc" id="L110">		    DiscreteAction element = iter.next();</span>
+<span class="nc" id="L111">		    element.spendTime(t);</span>
+<span class="nc" id="L112">		}</span>
+<span class="nc" id="L113">	}</span>
+
+	public void updateTimeLaps() {
+		// time laps is updated at the re-initialization
+		//this.currentAction.updateTimeLaps();	
+<span class="nc" id="L118">		this.nextMethod();	</span>
+<span class="nc" id="L119">	}</span>
+
+	public Method getMethod() {
+<span class="nc" id="L122">		return this.currentAction.getMethod();</span>
+	}
+
+	public Integer getCurrentLapsTime() {
+<span class="nc" id="L126">		return this.currentAction.getCurrentLapsTime();</span>
+	}
+
+	public Object getObject() {
+<span class="nc" id="L130">		return this.currentAction.getObject();</span>
+	}
+
+	public int compareTo(DiscreteActionInterface c) {
+<span class="nc" id="L134">		return this.currentAction.compareTo(c);</span>
+	}
+
+	public Boolean isEmpty() {
+<span class="nc bnc" id="L138" title="All 2 branches missed.">		return !this.hasNext();</span>
+	}
+
+	public DiscreteActionInterface next() {
+		//Integer lapsTime = this.getNextLapsTime();
+<span class="nc" id="L143">		Method method = this.getMethod();</span>
+<span class="nc" id="L144">		Object object = this.getObject();</span>
+<span class="nc" id="L145">		return this;</span>
+	}
+
+	public boolean hasNext() {
+<span class="nc bnc" id="L149" title="All 4 branches missed.">		return this.baseAction.hasNext() || !this.depedentActions.isEmpty();		</span>
+	}
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

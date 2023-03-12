@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="fr"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>RandomTimer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">projetQualyM</a> &gt; <a href="index.source.html" class="el_package">timer</a> &gt; <span class="el_source">RandomTimer.java</span></div><h1>RandomTimer.java</h1><pre class="source lang-java linenums">package timer;
+
+import java.util.Random;
+
+/**
+ * @author Flavien Vernier
+ *
+ */
+
+
+
+public class RandomTimer implements Timer {
+	
+<span class="nc" id="L14">	public static enum randomDistribution {</span>
+<span class="nc" id="L15">		POISSON, EXP, POSIBILIST, GAUSSIAN;</span>
+	}
+	
+	//private static String randomDistributionString[] = {&quot;POISSON&quot;, &quot;EXP&quot;, &quot;POSIBILIST&quot;, &quot;GAUSSIAN&quot;};
+	
+<span class="nc" id="L20">	private Random r = new Random();</span>
+	private randomDistribution distribution;
+	private double rate;
+	private double mean;
+	private double lolim;
+	private double hilim; 
+	//private int width; 
+	
+	
+	public static randomDistribution string2Distribution(String distributionName){
+<span class="nc" id="L30">		return randomDistribution.valueOf(randomDistribution.class, distributionName.toUpperCase());</span>
+	}	
+	public static String distribution2String(randomDistribution distribution){
+<span class="nc" id="L33">		return distribution.name();</span>
+	}
+	
+	/**
+	 * @param param constraint 
+	 * @throws Exception 
+	 */
+<span class="nc" id="L40">	public RandomTimer(randomDistribution distribution, double param) throws Exception{</span>
+<span class="nc bnc" id="L41" title="All 2 branches missed.">		if(distribution == randomDistribution.EXP ){</span>
+<span class="nc" id="L42">			this.distribution = distribution;</span>
+<span class="nc" id="L43">			this.rate = param;</span>
+<span class="nc" id="L44">			this.mean = 1/param;</span>
+<span class="nc" id="L45">			this.lolim = 0;</span>
+<span class="nc" id="L46">			this.hilim = Double.POSITIVE_INFINITY;</span>
+<span class="nc bnc" id="L47" title="All 2 branches missed.">		}else if(distribution == randomDistribution.POISSON){</span>
+<span class="nc" id="L48">			this.distribution = distribution;</span>
+<span class="nc" id="L49">			this.rate = Double.NaN;</span>
+<span class="nc" id="L50">			this.mean = param;</span>
+<span class="nc" id="L51">			this.lolim = 0;</span>
+<span class="nc" id="L52">			this.hilim = Double.POSITIVE_INFINITY;</span>
+		}else{
+<span class="nc" id="L54">			throw new Exception(&quot;Bad Timer constructor for selected distribution&quot;);</span>
+		}
+<span class="nc" id="L56">	}</span>
+	/**
+	 * @param min/max constraint
+	 * @throws Exception 
+	 */
+<span class="nc" id="L61">	public RandomTimer(randomDistribution distribution, int lolim, int hilim) throws Exception{</span>
+<span class="nc bnc" id="L62" title="All 4 branches missed.">		if(distribution == randomDistribution.POSIBILIST || distribution == randomDistribution.GAUSSIAN){</span>
+<span class="nc" id="L63">			this.distribution = distribution;</span>
+<span class="nc" id="L64">			this.mean = lolim + (hilim - lolim)/2;</span>
+<span class="nc" id="L65">			this.rate = Double.NaN;</span>
+<span class="nc" id="L66">			this.lolim = lolim;</span>
+<span class="nc" id="L67">			this.hilim = hilim;</span>
+		}else{
+<span class="nc" id="L69">			throw new Exception(&quot;Bad Timer constructor for selected distribution&quot;);</span>
+		}
+<span class="nc" id="L71">	}</span>
+	
+	public String getDistribution(){
+<span class="nc" id="L74">		return this.distribution.name();</span>
+	}
+	
+	public String getDistributionParam() {
+<span class="nc bnc" id="L78" title="All 2 branches missed.">		if(distribution == randomDistribution.EXP ){</span>
+<span class="nc" id="L79">			return &quot;rate: &quot; + this.rate;</span>
+<span class="nc bnc" id="L80" title="All 2 branches missed.">		}else if(distribution == randomDistribution.POISSON){</span>
+<span class="nc" id="L81">			return &quot;mean: &quot; + this.mean;</span>
+<span class="nc bnc" id="L82" title="All 4 branches missed.">		}else if(distribution == randomDistribution.POSIBILIST || distribution == randomDistribution.GAUSSIAN){</span>
+<span class="nc" id="L83">			return &quot;lolim: &quot; + this.lolim + &quot; hilim: &quot; + this.hilim;</span>
+		}
+		
+<span class="nc" id="L86">		return &quot;null&quot;;</span>
+	}
+	
+	public double getMean(){
+<span class="nc" id="L90">		return this.mean;</span>
+	}
+	
+	public String toString(){
+<span class="nc" id="L94">		String s = this.getDistribution();</span>
+<span class="nc bnc" id="L95" title="All 5 branches missed.">		switch (this.distribution){</span>
+		case POSIBILIST :
+<span class="nc" id="L97">			s += &quot; LoLim:&quot; + this.lolim + &quot; HiLim:&quot; + this.hilim;</span>
+<span class="nc" id="L98">			break;</span>
+		case POISSON :
+<span class="nc" id="L100">			s += &quot; mean:&quot; + this.mean;</span>
+<span class="nc" id="L101">			break;</span>
+		case EXP :
+<span class="nc" id="L103">			s += &quot; rate:&quot; + this.rate;</span>
+<span class="nc" id="L104">			break;</span>
+		case GAUSSIAN :
+<span class="nc" id="L106">			s += &quot; LoLim:&quot; + this.lolim + &quot; HiLim:&quot; + this.hilim;</span>
+			break;
+		}
+		
+<span class="nc" id="L110">		return s;</span>
+	}
+	
+
+	/* (non-Javadoc)
+	 * @see methodInvocator.Timer#next()
+	 */
+	@Override
+	public Integer next(){
+<span class="nc bnc" id="L119" title="All 5 branches missed.">		switch (this.distribution){</span>
+		case POSIBILIST :
+<span class="nc" id="L121">			return this.nextTimePosibilist();</span>
+		case POISSON :
+<span class="nc" id="L123">			return this.nextTimePoisson();</span>
+		case EXP :
+<span class="nc" id="L125">			return this.nextTimeExp();</span>
+		case GAUSSIAN :
+<span class="nc" id="L127">			return this.nextTimeGaussian();</span>
+		}
+<span class="nc" id="L129">		return -1; // Theoretically impossible !!!</span>
+	}
+	
+	/*
+	 * Equivalent to methodInvocator.RandomTimer#next()
+	 * 
+	 * @param since has no effect
+	 * 
+	 * @see methodInvocator.RandomTimer#next(int)
+	 */
+	/*@Override
+	public Integer next(int since){
+		return this.next();
+	}*/
+	
+	/**
+	 * Give good mean
+	 * Give wrong variance  
+	 */
+	private int nextTimePosibilist(){
+<span class="nc" id="L149">	    return (int)this.lolim + (int)(this.r.nextDouble() * (this.hilim - this.lolim));</span>
+	}
+	
+	/**
+	 * Give good mean
+	 * Give wrong variance  
+	 */
+	private int nextTimeExp(){
+<span class="nc" id="L157">	    return (int)(-Math.log(1.0 - this.r.nextDouble()) / this.rate);</span>
+	}
+	
+	
+	/**
+	 * Give good mean
+	 * Give good variance
+	 */
+	private int nextTimePoisson() {
+	    
+<span class="nc" id="L167">	    double L = Math.exp(-this.mean);</span>
+<span class="nc" id="L168">	    int k = 0;</span>
+<span class="nc" id="L169">	    double p = 1.0;</span>
+	    do {
+<span class="nc" id="L171">	        p = p * this.r.nextDouble();</span>
+<span class="nc" id="L172">	        k++;</span>
+<span class="nc bnc" id="L173" title="All 2 branches missed.">	    } while (p &gt; L);</span>
+<span class="nc" id="L174">	    return k - 1;</span>
+	}   		
+	    
+	
+	private int nextTimeGaussian(){
+<span class="nc" id="L179">		return (int)this.lolim + (int)((this.r.nextGaussian() + 1.0)/2.0 * (this.hilim - this.lolim));</span>
+	}
+	
+	
+	@Override
+	public boolean hasNext() {
+<span class="nc" id="L185">		return true;</span>
+	}
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
