@@ -1,0 +1,8 @@
+<settings xmlns="http://maven.apache.org/SETTINGS/1.1.0">
+    <servers>
+        <server>
+            <id>github</id>
+            <password>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</password>
+        </server>
+    </servers>
+</settings>
